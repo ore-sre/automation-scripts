@@ -1,0 +1,18 @@
+services:
+  - checkout-core-prod
+  - admin-service-prod
+  - checkout-app-prod
+  - collections-service-prod
+  - conversions-service-prod
+  - core-service-prod
+  - corridor-mgt-service-prod
+  - integrations-service-prod
+  - profile-service-prod
+  - quotes-service-prod
+  - settlements-service-prod
+  - switching-engine-prod
+  - wallets-service-prod
+  - disbursements-service-prod
+  - automated-deposit-poller-prod
+  - card-service-mastercard-prod
+  - mandate-mgt-service-prod

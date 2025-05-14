@@ -1,37 +1,196 @@
-import requests
-import os
-import json
+import os, requests, yaml
 from dotenv import load_dotenv
 import gspread
+import datetime
 
+# Load environment variables from .env file (for local development)
+# In GitHub Actions, these will be provided as environment variables
 load_dotenv()
 
+# Initialize Google Sheets client using service account credentials
+# This requires a service_account.json file in the project directory
+# In GitHub Actions, this file is created from a base64-encoded secret
 gc = gspread.service_account()
 
+# Get New Relic credentials from environment variables
+# These are set in .env file locally or in GitHub Secrets for Actions
 NR_API_KEY = os.getenv("NEW_RELIC_API_KEY")
-APP_ID = os.getenv("APP_ID")
+ACCOUNT_ID = int(os.getenv("ACCOUNT_ID"))
 
-url = f"https://api.eu.newrelic.com/v2/applications/{APP_ID}/metrics.json"
+# Load services from YAML file
+# This file contains a list of New Relic application names to monitor
+services = yaml.safe_load(open('services.yml'))['services']
 
+
+# New Relic GraphQL API endpoint (EU region)
+# Change to https://api.newrelic.com/graphql for US region
+url = f"https://api.eu.newrelic.com/graphql"
+
+# Set up request headers with authentication
 headers = {
     "X-Api-Key": NR_API_KEY,
-    "Content-Type": "application/json",
+    "Content-Type": "application/json",  # Required for GraphQL requests
 }
 
-response = requests.get(url, headers=headers)
+def fetch_avg_response_time(service_name):
+    # Define NRQL query to get average transaction duration in milliseconds
+    nrql = (
+            f"FROM Metric "
+            f"SELECT average(apm.service.transaction.duration) * 1000 AS average_response_time "
+            f"WHERE appName = '{service_name}' "
+            f"AND transactionType = 'Web' "
+            f"SINCE 1 day ago "
+            f"UNTIL now"
+            )
 
-print("Status Code:", response.status_code)
+    # Construct the GraphQL query with variables
+    payload = {
+            "query": """
+            query($accountId: Int!, $nrql: Nrql!) {
+                actor {
+                account(id: $accountId) {
+                    nrql(query: $nrql) {
+                    results
+                    }
+                }
+                }
+            }
+            """,
+            "variables": {
+                "accountId": ACCOUNT_ID,
+                "nrql": nrql
+            }
+        }
 
-# if response.status_code == 200:
-#     data = response.json()
-#     print("Data:", data)
-# else:
-#     print("Failed to fetch data")
+    # Make the API request to New Relic
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()  # Raise exception for HTTP errors
+    
+    # Parse the response JSON
+    data = response.json()
+    results = data["data"]["actor"]["account"]["nrql"]["results"]
+    avg_duration = results[0]["average_response_time"]
+    return avg_duration
 
-sh = gc.open("Production Reliability Workbook")
-worksheet = sh.worksheet("Incident Tracker")
+def fetch_error_rate(service_name):
+    # Define NRQL query to get error rate
+    nrql = (
+            f"FROM Metric "
+            f"SELECT sum(apm.service.error.count['count']) / count(apm.service.transaction.duration) AS error_rate "
+            f"WHERE appName = '{service_name}' "
+            f"AND transactionType = 'Web' "
+            f"SINCE 1 day ago "
+            f"UNTIL now"
+            )
 
-print(worksheet.get('d2'))
+    # Construct the GraphQL query with variables
+    payload = {
+            "query": """
+            query($accountId: Int!, $nrql: Nrql!) {
+                actor {
+                account(id: $accountId) {
+                    nrql(query: $nrql) {
+                    results
+                    }
+                }
+                }
+            }
+            """,
+            "variables": {
+                "accountId": ACCOUNT_ID,
+                "nrql": nrql
+            }
+        }
+    
+    # Make the API request to New Relic
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    
+    # Parse the response JSON
+    data = response.json()
+    results = data["data"]["actor"]["account"]["nrql"]["results"]
+    error_rate = results[0]["error_rate"]
+    return error_rate
 
-worksheet_list = sh.worksheets()
-print(worksheet_list)
+def fetch_throughput(service_name):
+    # Define NRQL query to get throughput (requests per second)
+    nrql = (
+            f"FROM Metric "
+            f"SELECT rate(count(apm.service.transaction.duration), 1 minute) AS average_throughput "
+            f"WHERE appName = '{service_name}' "
+            f"AND transactionType = 'Web' "
+            f"SINCE 1 day ago "
+            f"UNTIL now"
+            )
+
+    # Construct the GraphQL query with variables
+    payload = {
+            "query": """
+            query($accountId: Int!, $nrql: Nrql!) {
+                actor {
+                account(id: $accountId) {
+                    nrql(query: $nrql) {
+                    results
+                    }
+                }
+                }
+            }
+            """,
+            "variables": {
+                "accountId": ACCOUNT_ID,
+                "nrql": nrql
+            }
+        }
+    
+    # Make the API request to New Relic
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    
+    # Parse the response JSON
+    data = response.json()
+    results = data["data"]["actor"]["account"]["nrql"]["results"]
+    throughput = results[0]["average_throughput"]
+    return throughput
+    
+# Main execution block
+if __name__ == "__main__":
+    # Get current timestamp for data logging
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Get today's date for the date label row
+    today_label = datetime.datetime.now().date()
+    
+    # Create a row with the date label (with empty cells for alignment)
+    date_row = [f"▶ {today_label} ◀"] + [""] * 4
+    
+    # Collect metrics for each service
+    rows = []
+    for svc in services:
+        print(f"Fetching metrics for {svc}...")
+        avg_rt = fetch_avg_response_time(svc)
+        err_rate = fetch_error_rate(svc)
+        throughput = fetch_throughput(svc)
+        
+        # Create a row with all metrics for this service
+        rows.append([
+            timestamp,
+            svc,
+            avg_rt,
+            err_rate,
+            throughput,
+        ])
+    
+    # Open the Google Sheet and append the data
+    print("Updating Google Sheet...")
+    sh = gc.open("Production Reliability Workbook")
+    worksheet = sh.worksheet("APM Metrics Report")
+    
+    # Add the date separator row
+    worksheet.append_rows([date_row], value_input_option="USER_ENTERED")
+    
+    # Add the metrics rows
+    worksheet.append_rows(rows, value_input_option="USER_ENTERED")
+    
+    print(f"Successfully updated metrics for {len(services)} services.")
+
+
