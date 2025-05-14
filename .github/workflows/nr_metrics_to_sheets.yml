@@ -2,7 +2,7 @@ name: NewRelic Metrics to Sheets (Daily)
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Run at midnight UTC
+    - cron: '0 23 * * *' # Run at midnight UTC
   workflow_dispatch: # Allow manual triggering of the workflow
 
 jobs:
