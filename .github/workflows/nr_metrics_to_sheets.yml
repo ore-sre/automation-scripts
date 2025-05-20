@@ -2,11 +2,11 @@ name: NewRelic Metrics to Sheets (Daily)
 
 on:
   schedule:
-    - cron: '0 23 * * *' # Run at midnight UTC
+    - cron: '50 23 * * *' # Run at 23:50 UTC
   workflow_dispatch: # Allow manual triggering of the workflow
 
 jobs:
-  collect-metrics:
+  collect-metrics-errorlogs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,8 +21,14 @@ jobs:
       - name: Setup Google Service Account
         run: |
           echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
-      - name: Run metrics collection
+      - name: Run APM metrics collection
         run: python fetch_nr.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+      - name: Run error logs collection
+        run: python fetch_nr_err_logs.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
