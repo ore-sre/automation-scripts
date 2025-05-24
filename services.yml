@@ -13,6 +13,7 @@ services:
   - switching-engine-prod
   - wallets-service-prod
   - disbursements-service-prod
+  - fincra-notifications-prod
   - automated-deposit-poller-prod
   - card-service-mastercard-prod
   - mandate-mgt-service-prod

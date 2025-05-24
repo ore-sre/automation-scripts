@@ -136,8 +136,8 @@ def get_date_row():
     else:
         suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
     
-    # Format as "May 14th 2025"
-    formatted_date = today.strftime(f"%B {day}{suffix} %Y")
+    # Format as "Friday, May 14th 2025"
+    formatted_date = today.strftime(f"%A, %B {day}{suffix} %Y")
     
     # Return the formatted date row
     return [f"▶ {formatted_date} ◀"] + [""] * 6
