@@ -45,7 +45,7 @@ def fetch_avg_response_time(service_name):
             f"WHERE appName = '{service_name}' "
             f"AND transactionType = 'Web' "
             f"SINCE 1 week ago "
-            f"UNTIL now"
+            f"UNTIL now "
             )
 
     # Construct the GraphQL query with variables
@@ -85,7 +85,7 @@ def fetch_error_rate(service_name):
             f"WHERE appName = '{service_name}' "
             f"AND transactionType = 'Web' "
             f"SINCE 1 week ago "
-            f"UNTIL now"
+            f"UNTIL now "
             )
 
     # Construct the GraphQL query with variables
@@ -125,7 +125,7 @@ def fetch_throughput(service_name):
             f"WHERE appName = '{service_name}' "
             f"AND transactionType = 'Web' "
             f"SINCE 1 week ago "
-            f"UNTIL now"
+            f"UNTIL now "
             )
 
     # Construct the GraphQL query with variables
