@@ -44,8 +44,9 @@ def fetch_avg_cpu_usage(host_guid):
             f"SELECT average(cpuPercent) AS average_cpu_usage "
             f"WHERE entityGuid = '{host_guid}' "
             f"SINCE 1 week ago "
-            f"UNTIL now"
+            f"UNTIL now "
             )
+        
 
     # Construct the GraphQL query with variables
     payload = {
@@ -85,7 +86,7 @@ def fetch_avg_memory_usage(host_guid):
             f"SELECT average(memoryUsedPercent) AS average_memory_usage "
             f"WHERE entityGuid = '{host_guid}' "
             f"SINCE 1 week ago "
-            f"UNTIL now"
+            f"UNTIL now "
             )
 
     # Construct the GraphQL query with variables
@@ -125,7 +126,7 @@ def fetch_avg_disk_usage(host_guid):
             f"SELECT average(diskUsedPercent) AS average_disk_usage "
             f"WHERE entityGuid = '{host_guid}' "
             f"SINCE 1 week ago "
-            f"UNTIL now"
+            f"UNTIL now "
             )
 
     # Construct the GraphQL query with variables
