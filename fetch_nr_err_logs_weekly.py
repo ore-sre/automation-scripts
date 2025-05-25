@@ -195,7 +195,7 @@ if __name__ == "__main__":
     # Open the Google Sheet and append the data
     print("Updating Google Sheet...")
     sh = gc.open("Production Reliability Workbook")
-    worksheet = sh.worksheet("HOSTS Metrics Report")
+    worksheet = sh.worksheet("Weekly Error Logs")
         
     # Add the date separator row
     worksheet.append_rows([date_row], value_input_option="USER_ENTERED")
