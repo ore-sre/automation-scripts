@@ -39,3 +39,9 @@ jobs:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+      - name: Run weekly 5XX errors collection
+        run: python fetch_nr_5XX_errors_weekly.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
