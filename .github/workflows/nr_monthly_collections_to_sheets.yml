@@ -1,12 +1,11 @@
-name: NewRelic Daily Metrics to Sheets
+name: NewRelic Monthly Metrics to Sheets
 
 on:
   schedule:
-    - cron: '50 23 * * *' # Run at 23:50 UTC
-  workflow_dispatch: # Allow manual triggering of the workflow
-
+    - cron: '00 00 1 * *' # Run at midnight UTC on the 1st of every month
+  workflow_dispatch: # Allow manual triggering
 jobs:
-  collect-daily-metrics:
+  collect-monthly-metrics-errorlogs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,26 +20,26 @@ jobs:
       - name: Setup Google Service Account
         run: |
           echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
-      - name: Run APM metrics collection
-        run: python fetch_nr.py
+      - name: Run monthly APM metrics collection
+        run: python fetch_nr_monthly.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: service_account.json
-      - name: Run error logs collection
-        run: python fetch_nr_err_logs.py
+      - name: Run monthly host metrics collection
+        run: python fetch_nr_hosts_monthly.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: service_account.json
-      - name: Run host metrics collection
-        run: python fetch_nr_hosts.py
+      - name: Run monthly error logs collection
+        run: python fetch_nr_err_logs_monthly.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: service_account.json
-      - name: Run 5XX Errors
-        run: python fetch_nr_5XX_errors.py
+      - name: Run monthly 5XX errors collection
+        run: python fetch_nr_5XX_errors_monthly.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
