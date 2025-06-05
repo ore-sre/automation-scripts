@@ -1,0 +1,35 @@
+name: Daily Uptime to Sheets
+
+on:
+  schedule:
+    - cron: '50 23 * * *' # Run at 23:50 UTC
+  workflow_dispatch: # Allow manual triggering of the workflow
+
+jobs:
+    update-sheets:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                    python-version: 3.9
+
+            - name: Install dependencies
+              run: |
+                    cd uptime-to-sheets
+                    python -m pip install --upgrade pip
+                    pip install -r requirements.txt
+
+            - name: Setup Google Service Account
+              run: |
+                echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
+            
+            - name: Run uptime check and update sheets
+              env:
+                    GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+              run: |
+                    cd uptime-to-sheets
+                    python uptime_to_sheets.py

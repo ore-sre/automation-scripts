@@ -16,6 +16,7 @@ jobs:
           python-version: 3.9
       - name: Install dependencies
         run: |
+          cd nr-metrics-to-sheets
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Setup Google Service Account
@@ -28,19 +29,25 @@ jobs:
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: service_account.json
       - name: Run error logs collection
-        run: python fetch_nr_err_logs.py
+        run: |
+          cd nr-metrics-to-sheets
+          python fetch_nr_err_logs.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: service_account.json
       - name: Run host metrics collection
-        run: python fetch_nr_hosts.py
+        run: |
+          cd nr-metrics-to-sheets
+          python fetch_nr_hosts.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: service_account.json
       - name: Run 5XX Errors
-        run: python fetch_nr_5XX_errors.py
+        run: |
+          cd nr-metrics-to-sheets
+          python fetch_nr_5XX_errors.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
