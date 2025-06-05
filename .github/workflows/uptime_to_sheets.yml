@@ -32,4 +32,4 @@ jobs:
                     GOOGLE_APPLICATION_CREDENTIALS: service_account.json
               run: |
                     cd uptime-to-sheets
-                    python uptime_to_sheets.py
+                    python uptime-to-sheets.py
