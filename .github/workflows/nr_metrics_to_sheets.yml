@@ -23,7 +23,9 @@ jobs:
         run: |
           echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
       - name: Run APM metrics collection
-        run: python fetch_nr.py
+        run: |
+          cd nr-metrics-to-sheets
+          python fetch_nr.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
