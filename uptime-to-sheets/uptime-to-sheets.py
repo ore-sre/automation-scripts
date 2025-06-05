@@ -45,6 +45,8 @@ def timestamp():
 
 def get_overall_uptime():
     data = get_uptime_data()
+    if 'monitors' not in data:
+        raise Exception(f"UptimeRobot API error or invalid response: {data}")
     total_uptime = 0.0
     total_up_checks = 0
     total_checks = 0
