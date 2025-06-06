@@ -21,7 +21,7 @@ jobs:
           pip install -r requirements.txt
       - name: Setup Google Service Account
         run: |
-          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > ../service_account.json
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
       - name: Run weekly APM metrics collection
         run: |
           cd nr-metrics-to-sheets
