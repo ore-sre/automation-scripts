@@ -21,32 +21,36 @@ jobs:
           pip install -r requirements.txt
       - name: Setup Google Service Account
         run: |
-          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > ../service_account.json
       - name: Run weekly APM metrics collection
         run: |
-          python nr-metrics-to-sheets/fetch_nr_weekly.py
+          cd nr-metrics-to-sheets
+          python fetch_nr_weekly.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
       - name: Run weekly host metrics collection
         run: |
-          python nr-metrics-to-sheets/fetch_nr_hosts_weekly.py
+          cd nr-metrics-to-sheets
+          python fetch_nr_hosts_weekly.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
       - name: Run weekly error logs collection
         run: |
-          python nr-metrics-to-sheets/fetch_nr_err_logs_weekly.py
+          cd nr-metrics-to-sheets
+          python fetch_nr_err_logs_weekly.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
       - name: Run weekly 5XX errors collection
         run: |
-          python nr-metrics-to-sheets/fetch_nr_5XX_errors_weekly.py
+          cd nr-metrics-to-sheets
+          python fetch_nr_5XX_errors_weekly.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json

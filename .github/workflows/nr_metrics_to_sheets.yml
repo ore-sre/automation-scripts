@@ -21,32 +21,36 @@ jobs:
           pip install -r requirements.txt
       - name: Setup Google Service Account
         run: |
-          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > ../service_account.json
       - name: Run APM metrics collection
         run: |
-         python nr-metrics-to-sheets/fetch_nr.py
+          cd nr-metrics-to-sheets
+          python fetch_nr.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
       - name: Run error logs collection
         run: |
-          python nr-metrics-to-sheets/fetch_nr_err_logs.py
+          cd nr-metrics-to-sheets
+          python fetch_nr_err_logs.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
       - name: Run host metrics collection
         run: |
-          python nr-metrics-to-sheets/fetch_nr_hosts.py
+          cd nr-metrics-to-sheets
+          python fetch_nr_hosts.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
       - name: Run 5XX Errors
         run: |
-          python nr-metrics-to-sheets/fetch_nr_5XX_errors.py
+          cd nr-metrics-to-sheets
+          python fetch_nr_5XX_errors.py
         env:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: service_account.json
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
