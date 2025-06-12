@@ -53,3 +53,11 @@ jobs:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+      - name: Run Badly handled error KPI
+        run:  |
+          cd nr-metrics-to-sheets
+          python badly_handled_error_rate.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
