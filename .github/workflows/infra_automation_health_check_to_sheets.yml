@@ -33,4 +33,4 @@ jobs:
                     python main.py
               env:
                     GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
-                    UPTIME_ROBOT_API_KEY: ${{ secrets.FINCRA_GITHUB_TOKEN }}
+                    FINCRA_GITHUB_TOKEN: ${{ secrets.FINCRA_GITHUB_TOKEN }}
