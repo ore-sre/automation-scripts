@@ -1,4 +1,4 @@
-import requests
+import requests, yaml
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
@@ -16,58 +16,61 @@ load_dotenv()
 service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
 gc = gspread.service_account(filename=service_account_path)
 
+# Load Infrastructure repos from yaml file
+infrastructure_repos = yaml.safe_load(open('infrastructure-repos.yml'))['infrastructure-repos']
+
 
 org_name = "FincraNG"
 repo_name = "fincra-disbursements"
 token = os.getenv("FINCRA_GITHUB_TOKEN")
 
-def get_org_repos():
-    """
-    Fetch all repositories for a GitHub organization.
+# def get_org_repos():
+#     """
+#     Fetch all repositories for a GitHub organization.
     
-    Args:
-        org_name (str): Name of the GitHub organization
-        token (str): GitHub personal access token
+#     Args:
+#         org_name (str): Name of the GitHub organization
+#         token (str): GitHub personal access token
     
-    Returns:
-        List[dict]: List of repository information
-    """
-    base_url = f"https://api.github.com/orgs/{org_name}/repos"
-    headers = {
-        "Authorization": f"token {token}",
-        "Accept": "application/vnd.github.v3+json"
-    }
+#     Returns:
+#         List[dict]: List of repository information
+#     """
+#     base_url = f"https://api.github.com/orgs/{org_name}/repos"
+#     headers = {
+#         "Authorization": f"token {token}",
+#         "Accept": "application/vnd.github.v3+json"
+#     }
     
-    repos_info = []
-    repos = []
-    page = 1
+#     repos_info = []
+#     repos = []
+#     page = 1
     
-    while True:
-        response = requests.get(
-            f"{base_url}?page={page}&per_page=100",
-            headers=headers
-        )
+#     while True:
+#         response = requests.get(
+#             f"{base_url}?page={page}&per_page=100",
+#             headers=headers
+#         )
         
-        if response.status_code != 200:
-            raise Exception(f"Failed to fetch repos: {response.status_code}")
+#         if response.status_code != 200:
+#             raise Exception(f"Failed to fetch repos: {response.status_code}")
             
-        page_repos = response.json()
-        if not page_repos:
-            break
+#         page_repos = response.json()
+#         if not page_repos:
+#             break
             
-        repos_info.extend(page_repos)
-        page += 1  
+#         repos_info.extend(page_repos)
+#         page += 1  
 
-    print(f"Found {len(repos_info)} repositories:")
-    for repo in repos_info:
-        repos.append(repo['name'])
+#     print(f"Found {len(repos_info)} repositories:")
+#     for repo in repos_info:
+#         repos.append(repo['name'])
      
-    return repos
+#     return repos
 
 
 def get_workflow_stats():
     """Get statistics for workflow runs across all repos"""
-    repos = get_org_repos()
+    repos = infrastructure_repos
     
     total_runs = 0
     successful_runs = 0

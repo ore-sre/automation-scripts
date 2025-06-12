@@ -1,0 +1,5 @@
+infrastructure-repos:
+  - fincra3-deployments
+  - fincra3-infra
+  - kele-app-infra
+  - fincra-org-infra

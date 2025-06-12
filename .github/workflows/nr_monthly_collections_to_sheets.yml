@@ -61,3 +61,11 @@ jobs:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+      - name: Run Transaction Success Rate
+        run:  |
+          cd nr-metrics-to-sheets
+          python transaction_success_rate.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
