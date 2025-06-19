@@ -1,0 +1,6 @@
+requests
+python-dotenv
+gspread
+os
+datetime
+dateutil.parser

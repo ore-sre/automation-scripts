@@ -3,6 +3,7 @@ import gspread
 import os   
 import datetime
 from dotenv import load_dotenv
+import calendar, datetime
 
 # Load environment variables from .env file (for local development)
 # In GitHub Actions, these will be provided as environment variables
@@ -23,12 +24,17 @@ gc = gspread.service_account(filename=service_account_path)
 
 url = "https://api.uptimerobot.com/v2/getMonitors"
 
+# UNIX timestamp for Months
+# start = calendar.timegm(datetime.datetime(2025, 6, 15, 0, 0).utctimetuple())
+# end   = calendar.timegm(datetime.datetime(2025, 6, 19, 0, 0).utctimetuple())
+
 def get_uptime_data():
    
     payload = {
         'api_key': os.getenv('UPTIME_ROBOT_API_KEY'),
         'format': 'json',
         "custom_uptime_ratios": "1",
+        # "custom_uptime_ranges": f"{start}_{end}",
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     
@@ -50,7 +56,6 @@ def get_overall_uptime():
     total_uptime = 0.0
     total_up_checks = 0
     total_checks = 0
-    
     for monitor in data['monitors']:
         status = monitor.get("status")
         if status == 0:
@@ -62,7 +67,8 @@ def get_overall_uptime():
         if not interval_secs:
             continue  # Skip monitors without an interval
 
-        uptime_24h = float(monitor['custom_uptime_ratio'])
+        # uptime_24h = float(monitor['custom_uptime_ranges'])
+        uptime_24h = float(monitor['custom_uptime_ratios'])
         total_uptime += uptime_24h
 
         interval = monitor.get('interval', None) 

@@ -1,0 +1,97 @@
+name: NewRelic Monthly Metrics to Sheets
+
+on:
+  schedule:
+    - cron: '00 00 1 * *' # Run at midnight UTC on the 1st of every month
+  workflow_dispatch: # Allow manual triggering
+jobs:
+  collect-monthly-metrics-errorlogs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          cd nr-metrics-to-sheets
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Setup Google Service Account
+        run: |
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
+      - name: Run monthly APM metrics collection
+        run: |
+          cd nr-metrics-to-sheets
+          python fetch_nr_monthly.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+      - name: Run monthly host metrics collection
+        run: |
+          cd nr-metrics-to-sheets
+          python fetch_nr_hosts_monthly.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+      - name: Run monthly error logs collection
+        run: |
+          cd nr-metrics-to-sheets
+          python fetch_nr_err_logs_monthly.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+      - name: Run monthly 5XX errors collection
+        run: |
+          cd nr-metrics-to-sheets
+          python fetch_nr_5XX_errors_monthly.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+      - name: Run Badly handled error KPI
+        run:  |
+          cd nr-metrics-to-sheets
+          python badly_handled_error_rate.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+      - name: Run Transaction Success Rate
+        run:  |
+          cd nr-metrics-to-sheets
+          python transaction_success_rate.py
+        env:
+          NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
+          ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+
+  collect-jira-kpi-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          cd jira-kpi-to-sheets
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Setup Google Service Account
+        run: |
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
+      - name: Run Jira KPI data collection
+        run: |
+          cd jira-kpi-to-sheets
+          python lead-time.py
+        env:
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
