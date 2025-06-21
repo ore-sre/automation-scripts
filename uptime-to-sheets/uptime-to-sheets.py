@@ -21,7 +21,6 @@ gc = gspread.service_account(filename=service_account_path)
 
 
 
-
 url = "https://api.uptimerobot.com/v2/getMonitors"
 
 # UNIX timestamp for Months
@@ -68,7 +67,7 @@ def get_overall_uptime():
             continue  # Skip monitors without an interval
 
         # uptime_24h = float(monitor['custom_uptime_ranges'])
-        uptime_24h = float(monitor['custom_uptime_ratios'])
+        uptime_24h = float(monitor['custom_uptime_ratio'])
         total_uptime += uptime_24h
 
         interval = monitor.get('interval', None) 
