@@ -50,12 +50,15 @@ def timestamp():
 
 def get_overall_uptime():
     data = get_uptime_data()
+    # print(data['monitors'][0])
+
     if 'monitors' not in data:
         raise Exception(f"UptimeRobot API error or invalid response: {data}")
     total_uptime = 0.0
     total_up_checks = 0
     total_checks = 0
     for monitor in data['monitors']:
+        
         status = monitor.get("status")
         if status == 0:
         # Skip paused monitors
