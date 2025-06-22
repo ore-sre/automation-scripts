@@ -1,5 +1,4 @@
 requests
 python-dotenv
 gspread
-datetime
-dateutil.parser
+python-dateutil
