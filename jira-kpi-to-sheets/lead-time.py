@@ -1,4 +1,4 @@
-import requests
+import requests, yaml
 import os
 from dotenv import load_dotenv
 import gspread
@@ -18,6 +18,9 @@ load_dotenv()
 service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
 gc = gspread.service_account(filename=service_account_path)
 
+# Load teams from YAML file
+# This file contains a list of the teams 
+teams = yaml.safe_load(open('teams.yml'))['teams']
 
 # Get JIRA credentials from environment variables
 JIRA_URL = os.getenv("JIRA_URL")
@@ -67,9 +70,30 @@ def find_deployment_timestamps(histories):
                     exit_time = created
                     
     return entry_time, exit_time
-def calculate_deployment_to_resolution_lead_time():
-    jql_query = 'project = "Cross Border Product Development" AND status CHANGED TO "READY FOR DEPLOYMENT" AND status CHANGED FROM "READY FOR DEPLOYMENT" DURING (-30d, now())'
+
+def get_jql_query_for_team(team):
+ # jql_query = 'project = "{team}" AND status CHANGED TO "READY TO DEPLOY" AND status CHANGED FROM "READY TO DEPLOY" DURING ("2025-04-01","2025-04-31")'
+    if team == 'Cross Border Product Development':
+        return f'project = "{team}" AND status CHANGED TO "READY FOR DEPLOYMENT" AND status CHANGED FROM "READY FOR DEPLOYMENT" DURING (-30d, now())'
+    elif team == 'HQ':
+        return f'project = "{team}" AND status CHANGED TO "READY FOR DEPLOYMENT" AND status CHANGED FROM "READY FOR DEPLOYMENT" DURING (-30d, now())'
+    elif team == 'Kele Mobile App':
+        return f'project = "{team}" AND status CHANGED TO "READY TO DEPLOY" AND status CHANGED FROM "READY TO DEPLOY" DURING (-30d, now())'
+    elif team == 'Stablecoin VS':
+        return f'project = "{team}" AND status CHANGED TO "READY FOR DEPLOYMENT" AND status CHANGED FROM "READY FOR DEPLOYMENT" DURING (-30d, now())'
+    elif team == 'Global Collection':
+        return f'project = "{team}" AND status CHANGED TO "READY FOR DEPLOYMENT" AND status CHANGED FROM "READY FOR DEPLOYMENT" DURING (-30d, now())'
+    else:
+        return None
+    
+
+
+#  jql_query = 'project = "Cross Border Product Development" AND status CHANGED TO "READY FOR DEPLOYMENT" AND status CHANGED FROM "READY FOR DEPLOYMENT" DURING (-30d, now())'
     # jql_query = 'project = "Cross Border Product Development" AND status CHANGED TO "READY FOR DEPLOYMENT" AND status CHANGED FROM "READY FOR DEPLOYMENT" DURING ("2025-04-01","2025-04-31")'
+     
+ 
+def calculate_deployment_to_resolution_lead_time(team, jql_query=None):
+   
     # Set parameters for the API request
     params = {
         'jql': jql_query,
@@ -103,54 +127,44 @@ def calculate_deployment_to_resolution_lead_time():
         # Calculate average lead time
         if total_issues > 0:
             avg_lead_time = total_lead_time / total_issues
-            return total_issues, avg_lead_time
+            return team, total_issues, avg_lead_time
 
-def get_weekly_date_range():
-    # Get today's date
-    today = datetime.datetime.now().date()
-    
-    # Calculate the start of the week (previous Sunday)
-    start_of_week = today - datetime.timedelta(days=today.weekday() + 1)
-    
-    # Calculate the end of the week (next Saturday)
-    end_of_week = start_of_week + datetime.timedelta(days=6)
-    
-    # Function to add ordinal suffix to day
-    def add_ordinal_suffix(day):
-        if 4 <= day <= 20 or 24 <= day <= 30:
-            suffix = "th"
-        else:
-            suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
-        return f"{day}{suffix}"
-    
-    # Format start date as "Sunday, May 14th 2025"
-    start_day_with_suffix = add_ordinal_suffix(start_of_week.day)
-    start_date_formatted = start_of_week.strftime(f"%A, %B {start_day_with_suffix} %Y")
-    
-    # Format end date as "Saturday, May 20th 2025"
-    end_day_with_suffix = add_ordinal_suffix(end_of_week.day)
-    end_date_formatted = end_of_week.strftime(f"%A, %B {end_day_with_suffix} %Y")
-    
-    # Combine into a range string
-    date_range = f"{start_date_formatted} - {end_date_formatted}"
-    
+    # Get today's date for the date label row
+def get_month():
+    formatted_month = datetime.datetime.now().strftime("%B %Y")
     # Return the formatted date row
-    return date_range
+    return [f"▶ {formatted_month} ◀"] + [""] * 6
 
+def timestamp():
+    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 if __name__ == "__main__":
-    # Get the weekly date range
-    date_range = get_weekly_date_range()
-    total_issues, avg_lead_time = calculate_deployment_to_resolution_lead_time()
-    row = [date_range, total_issues, avg_lead_time]
-
+    month = get_month()
+    timestamp = timestamp()
+    rows = []
+    for team in teams:
+        jql_query = get_jql_query_for_team(team)
+        if not jql_query:
+            continue
+        
+        result = calculate_deployment_to_resolution_lead_time(team, jql_query=jql_query)
+        if result:
+            team, total_issues, avg_lead_time = result
+            row = [timestamp, team, avg_lead_time]
+        else:
+            row = [timestamp, team, 'N/A']
+        # Append the row to the list of rows
+        rows.append(row)
     # Open the Google Sheet and append the data
     print("Updating Google Sheet...")
     sh = gc.open("Production Reliability Workbook")
     worksheet = sh.worksheet("Lead Time")
-    
-    # Add the uptime row
-    worksheet.append_rows([row], value_input_option="USER_ENTERED")
 
-    print(f"Successfully updated lead time data for the week: {date_range}")
+     # Add the date separator row
+    worksheet.append_rows([month], value_input_option="USER_ENTERED")
+   
+    # Add the uptime row
+    worksheet.append_rows(rows, value_input_option="USER_ENTERED")
+
+    print(f"Successfully updated lead time data for the month: {month}")
 

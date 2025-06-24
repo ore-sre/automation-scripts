@@ -80,8 +80,9 @@ def get_mean_time_between_failures():
             log_time = datetime.fromtimestamp(log['datetime'], tz=timezone.utc)
 
             # if log['type'] == 1 and start_time <= log_time < end_time:  #Custom range
-            if log['type'] == 1 and log_time >= start_of_month:  # For the month
+            if log['type'] == 1 and log['duration'] > 120 and log_time >= start_of_month:  # For the month
                 # Type 1 indicates a downtime log
+                # print(log)
                 down_times.append(log_time)
         # 3. Sort them
         down_times.sort()

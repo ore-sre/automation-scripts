@@ -1,4 +1,4 @@
-import requests
+import requests, yaml
 import os
 from dotenv import load_dotenv
 import gspread
@@ -23,6 +23,10 @@ JIRA_URL = os.getenv("JIRA_URL")
 JIRA_USERNAME = os.getenv("JIRA_USERNAME")
 JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
 
+# Load teams from YAML file
+# This file contains a list of the teams 
+teams = yaml.safe_load(open('teams.yml'))['teams']
+
 #Instantiate with Credentials
 jira = requests.Session()
 jira.auth = (JIRA_USERNAME, JIRA_API_TOKEN) 
@@ -30,10 +34,24 @@ jira.auth = (JIRA_USERNAME, JIRA_API_TOKEN)
 jira_api_url = f"{JIRA_URL}/rest/api/3/search"
 # Define JQL query to get issues moved to Done in the last 7 days
 
-def get_deployments_per_engineer(team_size=None):
-    # jql_query = 'project = "Cross Border Product Development" AND status CHANGED FROM "READY FOR DEPLOYMENT" DURING ("2025-06-15 00:00", "2025-06-14 23:59")'  # For looking for specific date ranges
-    jql_query = 'project = "Cross Border Product Development" AND status CHANGED FROM "READY FOR DEPLOYMENT" DURING (-7d, now())'
-    # jql_query = 'project = "Cross Border Product Development" AND status CHANGED FROM "POST-DEPLOYMENT QA" TO "Done" DURING (-7d, now())'
+# 'project = "HQ" AND status CHANGED TO "DEPLOYED TO PROD" DURING (-7d, now()) OR status CHANGED TO "POST DEPLOYMENT CHECKS" DURING ("2025-01-01 00:00", "2025-01-31 23:59")'
+
+def get_jql_query_for_team(team):
+    # jql_query = f'project = "{team}" AND status CHANGED FROM "DEPLOYED TO PROD" DURING ("2025-01-01 00:00", "2025-01-31 23:59")' # For looking for specific date ranges
+    if team == 'Cross Border Product Development':
+        return f'project = "{team}" AND status CHANGED TO "POST-DEPLOYMENT QA" DURING (-7d, now())'
+    elif team == 'HQ':
+        return f'project = "HQ" AND status CHANGED TO "DEPLOYED TO PROD" DURING (-7d, now()) OR status CHANGED TO "POST DEPLOYMENT CHECKS" DURING (-7d, now())'
+    elif team == 'Kele Mobile App':
+        return f'project = "{team}" AND status CHANGED TO "POST DEPLOYMENT TEST" DURING (-7d, now())'
+    elif team == 'Stablecoin VS':
+        return f'project = "{team}" AND status CHANGED TO "POST DEPLOYMENT QA" DURING (-7d, now())'
+    elif team == 'Global Collection':
+        return f'project = "{team}" AND status CHANGED TO "POST DEPLOYMENT QA" DURING (-7d, now())'
+    else:
+        return None
+
+def get_deployments_per_engineer(team,team_size=None, jql_query=None):
     params = {
         'jql': jql_query,
         'fields': 'assignee',
@@ -57,13 +75,16 @@ def get_deployments_per_engineer(team_size=None):
         if 'Unassigned' in deployments_by_engineer:
             del deployments_by_engineer['Unassigned']
 
-        if team_size:
-            avg_deployments = total_deployments / team_size if team_size > 0 else 0
-        else:
-            num_engineers = len(deployments_by_engineer) or 1  # Prevent division by zero
-            avg_deployments = total_deployments / num_engineers
+        num_engineers = len(deployments_by_engineer) or 1  # Prevent division by zero
+        avg_deployments = total_deployments / num_engineers
 
-        return deployments_by_engineer, total_deployments, avg_deployments
+        # if team_size:
+        #     avg_deployments = total_deployments / team_size if team_size > 0 else 0
+        # else:
+        #     num_engineers = len(deployments_by_engineer) or 1  # Prevent division by zero
+        #     avg_deployments = total_deployments / num_engineers
+
+        return team, deployments_by_engineer, total_deployments, avg_deployments
 
     except requests.exceptions.RequestException as e:
         print(f"Error fetching data from JIRA: {e}")
@@ -106,24 +127,28 @@ def get_weekly_date_range():
     return [f"▶ {date_range} ◀"] + [""] * 6
 
 
-if __name__ == "__main__":
-    
+def main():
     rows = []
-    deployments_by_engineer, total_deployments, avg_deployments = get_deployments_per_engineer()
-    timestamp_value = timestamp()
     weekly_date_range = get_weekly_date_range()
+    timestamp_value = timestamp()
 
+    for team in teams:
+        jql_query = get_jql_query_for_team(team)
+        if not jql_query:
+            continue
+        # team_size = len(teams[team]) if isinstance(teams[team], list) else None
+        team_name, deployments_by_engineer, total_deployments, avg_deployments = get_deployments_per_engineer(team, team_size=None, jql_query=jql_query)
 
-    # Create a row for each engineer
-    for engineer, deployment_count in deployments_by_engineer.items():
-        # Include total_deployments only for the first engineer
-        if engineer == list(deployments_by_engineer.keys())[0]:
-            row = [timestamp_value, total_deployments, engineer, deployment_count, avg_deployments]
-        else:
-            row = [timestamp_value, "", engineer, deployment_count]
-        # row = [current_date, total_deployments, engineer, deployment_count]
-        rows.append(row)
-   
+        # Create a row for each engineer
+        for engineer, deployment_count in deployments_by_engineer.items():
+            # Include total_deployments only for the first engineer
+            if engineer == list(deployments_by_engineer.keys())[0]:
+                row = [timestamp_value, team_name, total_deployments, engineer, deployment_count, avg_deployments]
+            else:
+                row = ["", "", "", engineer, deployment_count]
+            # row = [current_date, total_deployments, engineer, deployment_count]
+            rows.append(row)
+
     # Open the Google Sheet and append the data
     print("Updating Google Sheet...")
     sh = gc.open("Production Reliability Workbook")
@@ -138,4 +163,27 @@ if __name__ == "__main__":
     print(f"Successfully updated Deployments per Engineer & Deployment Frequency data for the week: {weekly_date_range[0]}")
 #     print(f"Successfully updated Deployments per Engineer & Deployment Frequency data for the week: {weekly_date_range[0]}")
 
+if __name__ == "__main__":
+    main()
 
+# if __name__ == "__main__":
+
+#     for team in teams:
+#         jql_query = get_jql_query_for_team(team)
+#         get_deployments_per_engineer(team_size=None, jql_query=jql_query)
+    
+#     rows = []
+#     team, deployments_by_engineer, total_deployments, avg_deployments = get_deployments_per_engineer()
+#     timestamp_value = timestamp()
+#     weekly_date_range = get_weekly_date_range()
+
+
+#     # Create a row for each engineer
+#     for engineer, deployment_count in deployments_by_engineer.items():
+#         # Include total_deployments only for the first engineer
+#         if engineer == list(deployments_by_engineer.keys())[0]:
+#             row = [timestamp_value, total_deployments, engineer, deployment_count, avg_deployments]
+#         else:
+#             row = [timestamp_value, "", engineer, deployment_count]
+#         # row = [current_date, total_deployments, engineer, deployment_count]
+#         rows.append(row)
