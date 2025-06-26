@@ -119,3 +119,27 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
           UPTIME_ROBOT_API_KEY: ${{ secrets.UPTIME_ROBOT_API_KEY }}
+    
+  collect-infrastructure-automation-pipeline-stability-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          cd infra-automation-health-check
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Setup Google Service Account
+        run: |
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_BASE64 }}' | base64 -d > service_account.json
+      - name: Run infrastructure automation pipeline stability metrics collection
+        run: |
+          cd infrastructure-automation-pipeline-stability
+          python main.py
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+          FINCRA_GITHUB_TOKEN: ${{ secrets.FINCRA_GITHUB_TOKEN }}

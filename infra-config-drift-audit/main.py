@@ -1,3 +1,23 @@
+"""
+This script audits configuration drift across Fincra's infrastructure repositories by comparing the current state of infrastructure code with the deployed state.
+
+Main tasks:
+- Loads a list of infrastructure repositories from a YAML configuration file.
+- Fetches and compares configuration files or state from source control and deployed environments.
+- Identifies and reports any configuration drift.
+- Updates a Google Sheet ("Production Reliability Workbook" > "Infra Config Drift Audit") with audit results.
+
+Environment variables required:
+- FINCRA_GITHUB_TOKEN: GitHub token for API authentication.
+- GOOGLE_APPLICATION_CREDENTIALS (optional): Path to Google service account credentials.
+
+Dependencies:
+- requests
+- PyYAML
+- python-dotenv
+- gspread
+"""
+
 import requests, yaml
 import os
 from dotenv import load_dotenv
@@ -9,12 +29,12 @@ load_dotenv()
 # Initialize Google Sheets client using service account credentials
 # This requires a service_account.json file in the project directory
 # In GitHub Actions, this file is created from a base64-encoded secret
-gc = gspread.service_account()
+# gc = gspread.service_account()
 
 
 # Use the path from environment variable or default to service_account.json in current directory
-# service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
-# gc = gspread.service_account(filename=service_account_path)
+service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
+gc = gspread.service_account(filename=service_account_path)
 
 
 

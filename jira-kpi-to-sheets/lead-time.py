@@ -1,3 +1,22 @@
+"""
+This script calculates lead time KPIs from Jira issues and updates a Google Sheet for reporting.
+
+Main tasks:
+- Connects to Jira to fetch issue data related to lead time.
+- Calculates lead time metrics for completed issues over a specified period.
+- Updates a Google Sheet ("Production Reliability Workbook" > "Lead Time") with the calculated KPIs.
+
+Environment variables required:
+- JIRA_API_TOKEN: Jira API token for authentication.
+- JIRA_EMAIL: Jira user email for authentication.
+- GOOGLE_APPLICATION_CREDENTIALS (optional): Path to Google service account credentials.
+
+Dependencies:
+- requests
+- python-dotenv
+- gspread
+"""
+
 import requests, yaml
 import os
 from dotenv import load_dotenv

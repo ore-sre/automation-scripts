@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # Allow manual triggering of the workflow
 
 jobs:
-  collect-daily-metrics:
+  collect-nr-daily-metrics:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

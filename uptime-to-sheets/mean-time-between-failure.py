@@ -1,4 +1,4 @@
-import requests
+import requests, yaml
 import gspread
 import os
 from dotenv import load_dotenv
@@ -17,13 +17,16 @@ load_dotenv()
 # Initialize Google Sheets client using service account credentials
 # This requires a service_account.json file in the project directory
 # In GitHub Actions, this file is created from a base64-encoded secret
-# gc = gspread.service_account()
+gc = gspread.service_account()
 
 
 # Use the path from environment variable or default to service_account.json in current directory
-service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
-gc = gspread.service_account(filename=service_account_path)
+# service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
+# gc = gspread.service_account(filename=service_account_path)
 
+
+# Load Infrastructure repos from yaml file
+internal_services = yaml.safe_load(open('monitors.yml'))['internal-services']
 
 
 url = "https://api.uptimerobot.com/v2/getMonitors"
@@ -39,8 +42,8 @@ start_of_month = datetime(now.year, now.month, 1, tzinfo=timezone.utc)
 # For the day
 # start_of_day = datetime(now.year, now.month, now.day, tzinfo=timezone.utc)
 # Custom range 
-# start_time = datetime(2025, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-# end_time = datetime(2025, 2, 1, 0, 0, 0, tzinfo=timezone.utc)
+# start_time = datetime(2025, 5, 1, 0, 0, 0, tzinfo=timezone.utc)
+# end_time = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
 
 
 def get_logs_data():
@@ -51,6 +54,7 @@ def get_logs_data():
         'logs': 1,
         'logs_type': 1,  # 1 for all logs
         'logs_limit': 1000,  # Limit to 1000 logs 
+        'show_tags': 1, 
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     
@@ -72,6 +76,9 @@ def get_mean_time_between_failures():
     
     
     for monitor in data['monitors']:
+        #Skip external services
+        if monitor['friendly_name'] not in internal_services:
+            continue
         status = monitor.get("status")
         if status == 0:
         # Skip paused monitors
@@ -79,7 +86,7 @@ def get_mean_time_between_failures():
         for log in monitor.get('logs', []):
             log_time = datetime.fromtimestamp(log['datetime'], tz=timezone.utc)
 
-            # if log['type'] == 1 and start_time <= log_time < end_time:  #Custom range
+            # if log['type'] == 1 and start_time <= log_time < end_time and log['duration'] > 120:  #Custom range
             if log['type'] == 1 and log['duration'] > 120 and log_time >= start_of_month:  # For the month
                 # Type 1 indicates a downtime log
                 # print(log)

@@ -1,6 +1,5 @@
 requests
 python-dotenv
 gspread
-google-auth
 datetime
-pyyaml
+PyYAML

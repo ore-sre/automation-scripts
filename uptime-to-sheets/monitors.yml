@@ -1,0 +1,51 @@
+internal-services:
+  - Admin Service
+  - Authentication Service
+  - Checkout Core
+  - Collections Service
+  - Collections Service (Sandbox)
+  - Contact Us Page
+  - Conversions Service
+  - Conversions Service (Sandbox)
+  - Core Service
+  - Disbursements Service
+  - Fincra Audit Trail
+  - Fincra Blog
+  - Fincra Checkout
+  - Fincra Merchant Portal
+  - Fincra Merchant Portal (Sandbox)
+  - Fincra Partners Website
+  - Fincra Website
+  - Get Business Profile
+  - Get Business Profile (Sandbox)
+  - Isopacker
+  - Kandon Website
+  - Kele API Services
+  - Kele Core Banking
+  - Kele login
+  - Kele Staging Backend
+  - Kele Website
+  - Notifications service
+  - Notifications Service (Sandbox)
+  - Quotes Service
+  - Settlements Service
+  - Wallets Service
+external-service:
+  - Dojah
+  - Fincra Documentation
+  - Globus
+  - GTB Channel
+  - Habari
+  - Integrations Service
+  - Isopacker
+  - ISW Channel
+  - JamboyPay
+  - KoraPay
+  - MFS Africa
+  - Moniepoint
+  - NIBSS
+  - Rave Channel
+  - UPSL
+  - VFD Channel
+  - Wema Channel
+  - Zenith
