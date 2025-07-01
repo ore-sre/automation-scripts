@@ -17,12 +17,12 @@ load_dotenv()
 # Initialize Google Sheets client using service account credentials
 # This requires a service_account.json file in the project directory
 # In GitHub Actions, this file is created from a base64-encoded secret
-gc = gspread.service_account()
+# gc = gspread.service_account()
 
 
 # Use the path from environment variable or default to service_account.json in current directory
-# service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
-# gc = gspread.service_account(filename=service_account_path)
+service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
+gc = gspread.service_account(filename=service_account_path)
 
 
 # Load Infrastructure repos from yaml file

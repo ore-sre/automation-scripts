@@ -197,7 +197,7 @@ if __name__ == "__main__":
     worksheet = sh.worksheet("Monthly APM Metrics")
     
     # Add the date separator row
-    worksheet.append_rows([get_month], value_input_option="USER_ENTERED")
+    worksheet.append_rows([get_month()], value_input_option="USER_ENTERED")
     
     # Add the metrics rows
     worksheet.append_rows(rows, value_input_option="USER_ENTERED")
