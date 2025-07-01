@@ -36,14 +36,18 @@ now = datetime.now(timezone.utc)
 # For the year
 # start_of_year = datetime(now.year, 1, 1, tzinfo=timezone.utc)
 # For the month
-start_of_month = datetime(now.year, now.month, 1, tzinfo=timezone.utc)
+# Calculate the start of the previous month
+if now.month == 1:
+    start_of_month = datetime(now.year - 1, 12, 1, tzinfo=timezone.utc)
+else:
+    start_of_month = datetime(now.year, now.month - 1, 1, tzinfo=timezone.utc)
 # For the past 7 days
 # seven_days_ago = now - timedelta(days=7)
 # For the day
 # start_of_day = datetime(now.year, now.month, now.day, tzinfo=timezone.utc)
 # Custom range 
-# start_time = datetime(2025, 5, 1, 0, 0, 0, tzinfo=timezone.utc)
-# end_time = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
+# start_time = datetime(2025, 6, 1, 0, 0, 0, tzinfo=timezone.utc)
+# end_time = datetime(2025, 6, 30, 23, 59, 59, tzinfo=timezone.utc)
 
 
 def get_logs_data():
