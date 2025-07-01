@@ -112,12 +112,17 @@ def get_transaction_success_rate():
             response = requests.post(url, headers=headers, json=payload)
             response.raise_for_status()
             data = response.json()
-            
+
             # Check if response contains timeout error
             if 'errors' in data and any(err.get('errorClass') == 'TIMEOUT' for err in data.get('errors', [])):
                 raise requests.exceptions.RequestException("New Relic API Timeout")
-                
-            results = data["data"]["actor"]["account"]["nrql"]["results"][0].get("Average Success Rate (%)")
+            
+            results_list = data["data"]["actor"]["account"]["nrql"]["results"]
+            if not results_list or results_list[0].get("Average Success Rate (%)") is None:
+                print("No results or missing 'Average Success Rate (%)' in response:")
+                print(data)
+                return "N/A"
+            results = results_list[0].get("Average Success Rate (%)")
 
         except (requests.exceptions.RequestException, KeyError) as e:
             if attempt == max_retries - 1:
@@ -155,5 +160,5 @@ if __name__ == "__main__":
     worksheet = sh.worksheet("Transaction Success rate")
 
     worksheet.append_rows(rows, value_input_option="USER_ENTERED")
-    
-    print(f"Successfully updated transaction rate.")
+
+    print(f"Successfully updated transaction success rate data for the month: {month}")
