@@ -111,7 +111,7 @@ def get_terraform_apply_workflow_stats():
     }
 
 def get_month():
-    last_month = datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)
+    last_month = datetime.now().replace(day=1) - datetime.timedelta(days=1)
     formatted_month = last_month.strftime("%B %Y")
     return formatted_month
 

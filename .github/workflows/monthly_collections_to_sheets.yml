@@ -29,6 +29,9 @@ jobs:
           NEW_RELIC_API_KEY: ${{ secrets.NEW_RELIC_API_KEY }}
           ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
           GOOGLE_APPLICATION_CREDENTIALS: ../service_account.json
+      - name: List files in nr-metrics-to-sheets
+        run: |
+          ls -l nr-metrics-to-sheets
       - name: Run monthly host metrics collection
         run: |
           cd nr-metrics-to-sheets
