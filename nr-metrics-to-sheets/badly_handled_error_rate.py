@@ -34,11 +34,6 @@ headers = {
 }
 
 
-def get_month():
-    formatted_month = datetime.datetime.now().strftime("%B %Y")
-        # Return the formatted date row
-    return [f"▶ {formatted_month} ◀"] + [""] * 6
-
 
 def fetch_badly_handled_error_rate():
     # Define NRQL query to get error count
@@ -46,10 +41,10 @@ def fetch_badly_handled_error_rate():
         f"SELECT "
         f"filter(count(*), WHERE level = 'error') as totalErrors, "
         f"filter(count(*), WHERE level = 'error' AND (error.httpCode IS NULL OR eerror.httpCode = '')) as badlyHandledErrors, "
-        f"(filter(count(*), WHERE level = 'error' AND (error.httpCode IS NULL OR error.httpCodee = '')) * 100.0 / filter(count(*), WHERE level = 'error')) as badlyHandledRate "
+        f"(filter(count(*), WHERE level = 'error' AND (error.httpCode IS NULL OR error.httpCode = '')) * 100.0 / filter(count(*), WHERE level = 'error')) as badlyHandledRate "
         f"FROM Log "
-        f"SINCE '2025-05-01 00:00:00' "
-        f"UNTIL '2025-05-31 23:59:59' "
+        f"SINCE 30 days ago "
+        f"UNTIL now "
     )
 
 
@@ -81,11 +76,8 @@ def fetch_badly_handled_error_rate():
     data = response.json()
     results = data["data"]["actor"]["account"]["nrql"]["results"]
     return results
+    
 
-
-# Function to get current timestamp
-def get_current_timestamp():
-    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 def get_month():
     last_month = datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)
@@ -94,7 +86,6 @@ def get_month():
 # Main execution block
 if __name__ == "__main__":
     rows = []
-    timestamp = get_current_timestamp()
     total_errors = fetch_badly_handled_error_rate()[0]['totalErrors']
     badly_handled_errors = fetch_badly_handled_error_rate()[0]['badlyHandledErrors']
     badly_handled_error_rate = fetch_badly_handled_error_rate()[0]['badlyHandledRate'] 
@@ -106,7 +97,6 @@ if __name__ == "__main__":
                 badly_handled_errors,
                 badly_handled_error_rate,
             ])
-    print(rows)
 
     # Open the Google Sheet and append the data
     print("Updating Google Sheet...")
@@ -115,6 +105,6 @@ if __name__ == "__main__":
         
     # Add the logs rows
     worksheet.append_rows(rows, value_input_option="USER_ENTERED")
-        
-    print(f"Successfully updated")
+
+    print(f"Successfully updated Badly Handled Error Rate data for the month: {month}")
 
