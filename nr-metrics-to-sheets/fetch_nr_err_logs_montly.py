@@ -125,11 +125,12 @@ def convert_lastseen(lastseen):
 def get_current_timestamp():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# Function to create a date label row like Sunday, May 14th 2025 - Saturday, May 20th 2025
 def get_month():
-    formatted_month = datetime.datetime.now().strftime("%B %Y")
-        # Return the formatted date row
+    last_month = datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)
+    formatted_month = last_month.strftime("%B %Y")
+    # Return the formatted date row
     return [f"▶ {formatted_month} ◀"] + [""] * 6
+
 # Main execution block
 if __name__ == "__main__":
     rows = []

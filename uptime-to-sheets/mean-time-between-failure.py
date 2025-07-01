@@ -112,7 +112,9 @@ def get_mean_time_between_failures():
     return num_failures, mtbf
 
 def get_month():
-    return datetime.now().strftime("%B %Y")
+    last_month = datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)
+    formatted_month = last_month.strftime("%B %Y")
+    return formatted_month
 
 # Main execution block
 if __name__ == "__main__":

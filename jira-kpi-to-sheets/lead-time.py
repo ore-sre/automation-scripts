@@ -150,7 +150,8 @@ def calculate_deployment_to_resolution_lead_time(team, jql_query=None):
 
     # Get today's date for the date label row
 def get_month():
-    formatted_month = datetime.datetime.now().strftime("%B %Y")
+    last_month = datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)
+    formatted_month = last_month.strftime("%B %Y")
     # Return the formatted date row
     return [f"▶ {formatted_month} ◀"] + [""] * 6
 

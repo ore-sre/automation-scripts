@@ -111,7 +111,9 @@ def get_terraform_apply_workflow_stats():
     }
 
 def get_month():
-    return datetime.now().strftime("%B %Y")
+    last_month = datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)
+    formatted_month = last_month.strftime("%B %Y")
+    return formatted_month
 
 def update_google_sheet(stats):
     """Update Google Sheet with workflow statistics"""
