@@ -7,12 +7,12 @@ import datetime
 # In GitHub Actions, these will be provided as environment variables
 load_dotenv()
 
-gc = gspread.service_account()
+# gc = gspread.service_account()
 
 # Initialize Google Sheets client using service account credentials
 # Use the path from environment variable or default to service_account.json in current directory
-# service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
-# gc = gspread.service_account(filename=service_account_path)
+service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', 'service_account.json')
+gc = gspread.service_account(filename=service_account_path)
 
 # Get New Relic credentials from environment variables
 # These are set in .env file locally or in GitHub Secrets for Actions
