@@ -88,7 +88,8 @@ def get_current_timestamp():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 def get_month():
-    return datetime.datetime.now().strftime("%B %Y")
+    last_month = datetime.datetime.now().replace(day=1) - datetime.timedelta(days=1)
+    return last_month.strftime("%B %Y")
 
 # Main execution block
 if __name__ == "__main__":

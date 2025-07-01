@@ -75,7 +75,6 @@ def fetch_5XX_error(service_name):
     results = data["data"]["actor"]["account"]["nrql"]["results"]
     return results
 
-
 # Fetch total count of errors for a service
 def fetch_5XX_error_count(service_name):
     # Define NRQL query to get error count
@@ -105,6 +104,8 @@ def fetch_5XX_error_count(service_name):
                 "nrql": nrql
             }
         }
+
+
     
     # Make the API request to New Relic
     response = requests.post(url, headers=headers, json=payload)
@@ -115,6 +116,8 @@ def fetch_5XX_error_count(service_name):
     results = data["data"]["actor"]["account"]["nrql"]["results"]
     error_count = results[0]["count"]
     return error_count
+
+
 
 # Convert lastseen to human-redable string
 def convert_lastseen(lastseen):
