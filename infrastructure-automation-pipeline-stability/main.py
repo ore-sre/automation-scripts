@@ -62,8 +62,8 @@ def get_terraform_apply_workflow_stats():
         }
 
         # For specific date range
-        # start_date = datetime(2024, 5, 1)
-        # end_date = datetime(2024, 6, 1)
+        # start_date = datetime(2025, 6, 1)
+        # end_date = datetime(2025, 7, 1)
 
         # response = requests.get(base_url, headers=headers)
         # if response.status_code != 200:
