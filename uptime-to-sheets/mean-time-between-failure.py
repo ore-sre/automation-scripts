@@ -2,7 +2,7 @@ import requests, yaml
 import gspread
 import os
 from dotenv import load_dotenv
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 """
     This script calculates the Mean Time Between Failures (MTBF) for uptime monitoring
     and updates a Google Sheet with the results.
@@ -112,7 +112,7 @@ def get_mean_time_between_failures():
     return num_failures, mtbf
 
 def get_month():
-    last_month = datetime.now().replace(day=1) - datetime.timedelta(days=1)
+    last_month = datetime.now().replace(day=1) - timedelta(days=1)
     formatted_month = last_month.strftime("%B %Y")
     return formatted_month
 
