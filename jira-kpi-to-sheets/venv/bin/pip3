@@ -1,4 +1,4 @@
-#!/Users/oreoluwa/Documents/fincra/automations-scripts/jira/venv/bin/python3
+#!/Users/oreoluwa/Documents/fincra/automations-scripts/jira-kpi-to-sheets/venv/bin/python3.13
 # -*- coding: utf-8 -*-
 import re
 import sys
